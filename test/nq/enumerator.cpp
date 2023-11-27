@@ -1,3 +1,6 @@
+#ifdef UNDEFVERBOSE
+#undef VERBOSE
+#endif
 
 static int pos (int row, int col, int n) {
     assert (0 <= row), assert (row < n);
