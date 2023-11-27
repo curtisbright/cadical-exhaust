@@ -17,9 +17,9 @@ class SolutionEnumerator : CaDiCaL::ExternalPropagator {
 public:
     int sol_count = 0; //TODO check if the solutions are uniq
 
-    SolutionEnumerator(CaDiCaL::Solver * s, int n) : solver(s) { 
+    SolutionEnumerator(CaDiCaL::Solver * s, int n) : solver(s) {
         solver->connect_external_propagator(this);
-        for (int i = 0; i < n; i++) 
+        for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)
                 solver->add_observed_var (pos (i, j, n));
 
@@ -63,7 +63,7 @@ public:
         return (!blocking_clause.empty());
     }
 
-    int cb_add_external_clause_lit () { 
+    int cb_add_external_clause_lit () {
         if (blocking_clause.empty()) return 0;
         else {
             int lit = blocking_clause.back();
