@@ -33,9 +33,13 @@ class SymmetryBreaker : CaDiCaL::ExternalPropagator {
     CaDiCaL::Solver * solver;
     std::vector<std::vector<int>> new_clauses;
     std::deque<std::vector<int>> current_trail;
-    int count = 0;
 public:
     SymmetryBreaker(CaDiCaL::Solver * s, int order) : solver(s) {
+        if (order == 0) {
+            std::cout << "c Need to provide order to use programmatic symmetry breaking" << std::endl;
+            return;
+        }
+        std::cout << "c Solving the first UNSAT pigeonhole problem of order " << order << std::endl;
         n = order;
         solver->connect_external_propagator(this);
         for (int h = 0; h < n; h++)

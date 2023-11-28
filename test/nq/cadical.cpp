@@ -867,7 +867,7 @@ int App::main (int argc, char **argv) {
 
     int max_var = solver->active ();
     //std::cout << "Enumerating solutions of the " << n << "-Queens problem." << std::endl;
-    std::cout << "Nof vars: " << max_var << std::endl;
+    //std::cout << "c Nof vars: " << max_var << std::endl;
 
     res = solver->solve ();
   }

@@ -12,12 +12,15 @@ class SolutionEnumerator : CaDiCaL::ExternalPropagator {
     CaDiCaL::Solver * solver;
     std::vector<int> blocking_clause = {};
     size_t full_assignment_size = 0;
-    int order = 0;
-
 public:
     int sol_count = 0; //TODO check if the solutions are uniq
 
     SolutionEnumerator(CaDiCaL::Solver * s, int n) : solver(s) {
+        if (n == 0) {
+            std::cout << "c Need to provide order to use programmatic enumeration" << std::endl;
+            return;
+        }
+        std::cout << "c Enumerating solutions of the " << n << "-Queens problem." << std::endl;
         solver->connect_external_propagator(this);
         for (int i = 0; i < n; i++)
             for (int j = 0; j < n; j++)
