@@ -26,7 +26,7 @@ COMPILE=$(CXX) $(CXXFLAGS) -I$(DIR)
 
 #--------------------------------------------------------------------------#
 
-all: libcadical.a cadical mobical
+all: libcadical.a cadical-ks cadical mobical
 
 #--------------------------------------------------------------------------#
 
@@ -39,6 +39,9 @@ all: libcadical.a cadical mobical
 
 # Application binaries (the stand alone solver 'cadical' and the model based
 # tester 'mobical') and the library are the main build targets.
+
+cadical-ks: cadical-ks.o libcadical.a makefile
+	$(COMPILE) -o $@ $< -L. -lcadical $(LIBS)
 
 cadical: cadical.o libcadical.a makefile
 	$(COMPILE) -o $@ $< -L. -lcadical $(LIBS)
