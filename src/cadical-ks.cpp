@@ -14,8 +14,6 @@
 
 #include "symbreak.hpp"
 
-int order = 0;
-
 /*------------------------------------------------------------------------*/
 
 namespace CaDiCaL {
@@ -347,6 +345,9 @@ bool App::most_likely_existing_cnf_file (const char *path) {
 
 int App::main (int argc, char **argv) {
 
+  int order = 0;
+  int unembeddable_check = 0;
+
   // Handle options which lead to immediate exit first.
 
   if (argc == 2) {
@@ -491,19 +492,31 @@ int App::main (int argc, char **argv) {
         APPERR ("invalid decision limit");
       else
         decision_limit_specified = argv[i];
-    }
-    else if (!strcmp (argv[i], "--order")) {
+    } else if (!strcmp (argv[i], "--order")) {
       if (++i == argc)
         APPERR ("argument to '--order' missing");
       else if (order != 0)
-        APPERR ("multiple time limit '--order %d' and '--order %s'", order, argv[i]);
+        APPERR ("multiple argument '--order %d' and '--order %s'", order, argv[i]);
       else if (!parse_int_str (argv[i], order))
         APPERR ("invalid argument in '--order %s'", argv[i]);
-      else if (order < 0)
-        APPERR ("invalid time limit");
+      else if (order < 0 || order > 40)
+        APPERR ("invalid order");
       else {
         order = stoi(argv[i]);
         std::cout << "c order = " << order << endl;
+      }
+    } else if (!strcmp (argv[i], "--unembeddable-check")) {
+      if (++i == argc)
+        APPERR ("argument to '--unembeddable-check' missing");
+      else if (unembeddable_check != 0)
+        APPERR ("multiple argument '--unembeddable-check %d' and '--unembeddable-check %s'", order, argv[i]);
+      else if (!parse_int_str (argv[i], unembeddable_check))
+        APPERR ("invalid argument in '--unembeddable-check %s'", argv[i]);
+      else if (unembeddable_check < 0 || unembeddable_check > 17)
+        APPERR ("invalid unembeddable-check");
+      else {
+        unembeddable_check = stoi(argv[i]);
+        std::cout << "c unembeddable-check = " << unembeddable_check << endl;
       }
     }
 #ifndef __WIN32
@@ -863,10 +876,9 @@ int App::main (int argc, char **argv) {
   } else {
     solver->section ("solving");
 
-    SymmetryBreaker se(solver, order);
+    SymmetryBreaker se(solver, order, unembeddable_check);
 
     max_var = solver->active ();
-    //std::cout << "c Enumerating solutions of the " << n << "-Queens problem." << std::endl;
     //std::cout << "c Nof vars: " << max_var << std::endl;
 
     res = solver->solve ();

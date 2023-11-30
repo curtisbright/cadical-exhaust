@@ -1,11 +1,13 @@
 #include "symbreak.hpp"
 #include <iostream>
+#include "unembeddable_graphs.h"
 #include "hash_values.h"
 
 FILE * canonicaloutfile = NULL;
 FILE * noncanonicaloutfile = NULL;
 FILE * permoutfile = NULL;
 FILE * exhaustfile = NULL;
+FILE * musoutfile = NULL;
 
 // The kth entry estimates the number of permuations needed to show canonicity in order (k+1)
 long perm_cutoff[MAXORDER] = {0, 0, 0, 0, 0, 0, 20, 50, 125, 313, 783, 1958, 4895, 12238, 30595, 76488, 191220, 478050, 1195125, 2987813, 7469533, 18673833, 46684583};
@@ -21,14 +23,23 @@ double noncanontimearr[MAXORDER] = {};
 long canon_np[MAXORDER] = {};
 long noncanon_np[MAXORDER] = {};
 #endif
+long muscount = 0;
+long muscounts[17] = {};
+double mustime = 0;
 
-SymmetryBreaker::SymmetryBreaker(CaDiCaL::Solver * s, int order) : solver(s) {
+SymmetryBreaker::SymmetryBreaker(CaDiCaL::Solver * s, int order, int uc) : solver(s) {
     if (order == 0) {
         std::cout << "c Need to provide order to use programmatic code" << std::endl;
         return;
     }
+    if (uc == 0) {
+        std::cout << "c Not checking for unembeddable subgraphs" << std::endl;
+    } else {
+        std::cout << "c Checking for " << uc << " unembeddable subgraphs" << std::endl;
+    }
     n = order;
     num_edge_vars = n*(n-1)/2;
+    unembeddable_check = uc;
     assign = new int[num_edge_vars];
     fixed = new bool[num_edge_vars];
     colsuntouched = new int[n];
@@ -69,6 +80,13 @@ SymmetryBreaker::~SymmetryBreaker () {
         printf("Canonicity checking   : %g s\n", canontime);
         printf("Noncanonicity checking: %g s\n", noncanontime);
         printf("Total canonicity time : %g s\n", canontime+noncanontime);
+        if (unembeddable_check > 0) {
+            printf("Unembeddable checking : %g s\n", mustime);
+            for(int g=0; g<unembeddable_check; g++) {
+                printf("        graph #%2d     : %-12" PRIu64 "\n", g, muscounts[g]);
+            }
+            printf("Total unembed. graphs : %ld\n", muscount);
+        }
     }
 }
 
@@ -278,6 +296,79 @@ bool SymmetryBreaker::cb_has_external_clause () {
             }
         }
     }
+
+    for(int g=0; g<unembeddable_check; g++)
+    {
+        int p[12]; // If an umembeddable subgraph is found, p will contain which rows of M correspond with the rows of the lex greatest representation of the unembeddable subgraph
+        int P[n];
+        for(int j=0; j<n; j++) P[j] = -1;
+
+        const double before = CaDiCaL::absolute_process_time();
+        bool ret = has_mus_subgraph(n, P, p, g);
+        const double after = CaDiCaL::absolute_process_time();
+        mustime += (after-before);
+
+        // If graph has minimal unembeddable subgraph (MUS)
+        if (ret) {
+            muscount++;
+            muscounts[g]++;
+            new_clauses.push_back(std::vector<int>());
+
+#ifdef VERBOSE
+            std::cout << "c Found minimal umbeddable subgraph #" << g << ": ";
+#endif
+
+            int c = 0;
+            for(int jj=0; jj<n; jj++) {
+                for(int ii=0; ii<jj; ii++) {
+                    if(assign[c]==l_True && P[jj] != -1 && P[ii] != -1)
+                        if((P[ii] < P[jj] && mus[g][P[ii] + P[jj]*(P[jj]-1)/2]) || (P[jj] < P[ii] && mus[g][P[jj] + P[ii]*(P[ii]-1)/2])) {
+                            new_clauses.back().push_back(-(c+1));
+#ifdef VERBOSE
+                            std::cout << c+1 << " ";
+#endif
+                        }
+                    c++;
+                }
+            }
+
+#ifdef VERBOSE
+            std::cout << std::endl;
+#endif
+
+            if(musoutfile != NULL) {
+                //fprintf(musoutfile, "a ");
+                int c = 0;
+                for(int jj=0; jj<n; jj++) {
+                    for(int ii=0; ii<jj; ii++) {
+                        if(assign[c]==l_True && P[jj] != -1 && P[ii] != -1)
+                            if((P[ii] < P[jj] && mus[g][P[ii] + P[jj]*(P[jj]-1)/2]) || (P[jj] < P[ii] && mus[g][P[jj] + P[ii]*(P[ii]-1)/2]))
+                                fprintf(musoutfile, "-%d ", c+1);
+                        c++;
+                    }
+                }
+
+                fprintf(musoutfile, "0\n");
+                fflush(musoutfile);
+            }
+
+            if(permoutfile != NULL) {
+                fprintf(permoutfile, "Minimal unembeddable subgraph %d:", g);
+                int mii = 10;
+                if(g >= 2 && g < 7)
+                    mii = 11;
+                else if(g >= 7)
+                    mii = 12;
+                for(int ii=0; ii<mii; ii++) {
+                    fprintf(permoutfile, "%s%d", ii == 0 ? "" : " ", p[ii]);
+                }
+                fprintf(permoutfile, "\n");
+            }
+            return true;
+        }
+    }
+
+    // No programmatic clause generated
     return false;
 }
 
@@ -418,4 +509,67 @@ bool SymmetryBreaker::is_canonical(int k, int p[], int& x, int& y, int& i, bool 
     canon_np[k-1] += np;
 #endif
     return true;
+}
+
+// Returns true when the k-vertex subgraph (with adjacency matrix M) contains the g-th minimal unembeddable graph
+// M is determined by the current assignment to the first k*(k-1)/2 variables
+// If an unembeddable subgraph is found in M, P is set to the mapping from the rows of M to the rows of the lex
+// greatest representation of the unembeddable adjacency matrix (and p is the inverse of P)
+bool SymmetryBreaker::has_mus_subgraph(int k, int* P, int* p, int g) {
+    int pl[12]; // pl[k] contains the current list of possibilities for kth vertex (encoded bitwise)
+    int pn[13]; // pn[k] contains the initial list of possibilities for kth vertex (encoded bitwise)
+    pl[0] = (1 << k) - 1;
+    pn[0] = (1 << k) - 1;
+    int i = 0;
+
+    while(1) {
+        // If no possibilities for ith vertex then backtrack
+        if(pl[i]==0) {
+            // Backtrack to vertex that has at least two possibilities
+            while((pl[i] & (pl[i] - 1)) == 0) {
+                i--;
+                if(i==-1) {
+                    // No permutations produce a matrix containing the gth submatrix
+                    return false;
+                }
+            }
+            // Remove p[i] as a possibility from the ith vertex
+            pl[i] = pl[i] & ~(1 << p[i]);
+        }
+
+        p[i] = log2(pl[i] & -pl[i]); // Get index of rightmost high bit
+        pn[i+1] = pn[i] & ~(1 << p[i]); // List of possibilities for (i+1)th vertex
+
+        // Determine if the permuted matrix p(M) is contains the gth submatrix
+        bool result_known = false;
+        for(int j=0; j<i; j++) {
+            if(!mus[g][i*(i-1)/2+j])
+                continue;
+            const int px = MAX(p[i], p[j]);
+            const int py = MIN(p[i], p[j]);
+            const int pj = px*(px-1)/2 + py;
+            if(assign[pj] == l_False) {
+                // Permutation sends a non-edge to a gth submatrix edge; stop considering
+                result_known = true;
+                break;
+            }
+        }
+
+        if(!result_known && ((i == 9 && g < 2) || (i == 10 && g < 7) || i == 11)) {
+            // The complete gth submatrix found in p(M)
+            for(int j=0; j<=i; j++) {
+                P[p[j]] = j;
+            }
+            return true;
+        }
+        if(!result_known) {
+            // Result is unknown; need to define p[i] for another i
+            i++;
+            pl[i] = pn[i];
+        }
+        else {
+            // Remove p[i] as a possibility from the ith vertex
+            pl[i] = pl[i] & ~(1 << p[i]);
+        }
+    }
 }
