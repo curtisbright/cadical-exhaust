@@ -37,6 +37,9 @@ public:
   virtual void add_derived_clause (uint64_t, bool, const vector<int> &,
                                    const vector<uint64_t> &) {}
 
+  // Notify the observer that a trusted clause has been derived.
+  virtual void add_trusted_clause (const vector<int> &) {}
+
   // Notify the observer that a clause is deleted.
   // Includes ID and redundant/irredundant
   // Arguments: ID, redundant, clause

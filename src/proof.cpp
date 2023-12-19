@@ -517,6 +517,13 @@ void Proof::add_derived_clause () {
   clause_id = 0;
 }
 
+void Proof::add_trusted_clause (const vector<int> &clause) {
+  LOG (clause, "PROOF adding trusted clause");
+  for (auto &tracer : tracers) {
+    tracer->add_trusted_clause (clause);
+  }
+}
+
 void Proof::delete_clause () {
   LOG (clause, "PROOF deleting external clause");
   if (lratbuilder)

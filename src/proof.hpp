@@ -80,6 +80,7 @@ public:
   void add_derived_clause (Clause *c, const vector<uint64_t> &);
   void add_derived_clause (uint64_t, bool, const vector<int> &,
                            const vector<uint64_t> &);
+  void add_trusted_clause (const vector<int> &);
 
   // deletion of clauses. It comes in several variants, depending if the
   // clause should be restored or not

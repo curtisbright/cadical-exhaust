@@ -214,6 +214,9 @@ public:
   Solver ();
   ~Solver ();
 
+  void add_trusted_clause(const std::vector<int> & clause);
+  FILE * permoutfile = NULL;
+
   static const char *signature (); // name of this library
 
   // Core functionality as in the IPASIR incremental SAT solver interface.

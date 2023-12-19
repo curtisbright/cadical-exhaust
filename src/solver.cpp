@@ -1608,4 +1608,8 @@ void Solver::error (const char *fmt, ...) {
   va_end (ap);
 }
 
+void Solver::add_trusted_clause (const vector<int> &clause) {
+  internal->proof->add_trusted_clause (clause);
+}
+
 } // namespace CaDiCaL
