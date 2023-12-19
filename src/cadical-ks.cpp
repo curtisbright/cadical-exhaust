@@ -520,7 +520,7 @@ int App::main (int argc, char **argv) {
       }
     } else if (!strcmp (argv[i], "--perm-out")) {
       if (++i == argc)
-        APPERR ("argument to '--unembeddable-check' missing");
+        APPERR ("argument to '--perm-out' missing");
       else if (solver->permoutfile != NULL)
         APPERR ("multiple argument '--perm-out'");
       else {
