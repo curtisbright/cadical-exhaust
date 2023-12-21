@@ -713,7 +713,7 @@ int App::main (int argc, char **argv) {
     }
     if (proofsize_limit >= 0) {
      solver->message (
-          "setting proofsize limit to %d bytes (due to '%s')",
+          "setting proofsize limit to %d MiB (due to '%s')",
           proofsize_limit, proofsize_limit_specified);
       bool succeeded = solver->limit ("proofsize", proofsize_limit);
       assert (succeeded), (void) succeeded;
