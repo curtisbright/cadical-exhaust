@@ -1,14 +1,8 @@
 #include "internal.hpp"
-#include <set>
 
 #define l_False 0
 #define l_True 1
 #define l_Undef 2
-
-#define MAX(X,Y) ((X) > (Y)) ? (X) : (Y)
-#define MIN(X,Y) ((X) > (Y)) ? (Y) : (X)
-
-const int MAXORDER = 40;
 
 class SymmetryBreaker : CaDiCaL::ExternalPropagator {
     CaDiCaL::Solver * solver;
@@ -16,15 +10,10 @@ class SymmetryBreaker : CaDiCaL::ExternalPropagator {
     std::deque<std::vector<int>> current_trail;
     int * assign;
     bool * fixed;
-    int * colsuntouched;
     int n = 0;
-    int unembeddable_check = 0;
     long sol_count = 0;
-    int num_edge_vars = 0;
-    std::set<unsigned long> canonical_hashes[MAXORDER];
-    std::set<unsigned long> solution_hashes;
 public:
-    SymmetryBreaker(CaDiCaL::Solver * s, int order, int uc);
+    SymmetryBreaker(CaDiCaL::Solver * s, int order);
     ~SymmetryBreaker ();
     void notify_assignment(int lit, bool is_fixed);
     void notify_new_decision_level ();

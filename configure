@@ -470,8 +470,8 @@ clean:
 	rm -f "$makefile"
 test:
 	\$(MAKE) -C "\$(CADICALBUILD)" test
-cadical-ks:
-	\$(MAKE) -C "\$(CADICALBUILD)" cadical-ks
+cadical-exhaust:
+	\$(MAKE) -C "\$(CADICALBUILD)" cadical-exhaust
 cadical:
 	\$(MAKE) -C "\$(CADICALBUILD)" cadical
 mobical:
