@@ -60,7 +60,6 @@ void SymmetryBreaker::notify_backtrack (size_t new_level) {
 }
 
 bool SymmetryBreaker::cb_check_found_model (const std::vector<int> & model) {
-    assert(model.size() == num_edge_vars);
     sol_count += 1;
 
 #ifdef VERBOSE

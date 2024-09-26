@@ -228,7 +228,6 @@ public:
   bool proof_specified = false;
 
   void add_trusted_clause(const std::vector<int> & clause);
-  FILE * permoutfile = NULL;
 
   static const char *signature (); // name of this library
 

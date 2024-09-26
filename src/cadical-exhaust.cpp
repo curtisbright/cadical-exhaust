@@ -986,8 +986,6 @@ void App::init () {
 App::App () : solver (0) {} // Only partially initialize the app.
 
 App::~App () {
-  if (solver->permoutfile)
-    fclose(solver->permoutfile);
   if (!solver)
     return; // Only partially initialized.
   Signal::reset ();
