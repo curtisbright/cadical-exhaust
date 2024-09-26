@@ -121,7 +121,7 @@ void App::print_usage (bool all) {
 #ifndef __WIN32
             "  -t <sec>       set wall clock time limit\n"
 #endif
-            "  -order <n>     only do an exhaustive search over vars 1 to n\n"
+            "  --order <n>    only do an exhaustive search over vars 1 to n\n"
     );
   } else { // Print complete list of all options.
     printf (
@@ -138,7 +138,7 @@ void App::print_usage (bool all) {
 #ifndef __WIN32
         "  -t <sec>       set wall clock time limit\n"
 #endif
-        "  -order <n>     only do an exhaustive search over vars 1 to n\n"
+        "  --order <n>    only do an exhaustive search over vars 1 to n\n"
         "\n"
         "Or '<option>' is one of the less common options\n"
         "\n"
