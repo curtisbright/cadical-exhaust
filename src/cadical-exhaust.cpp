@@ -102,7 +102,7 @@ public:
 /*------------------------------------------------------------------------*/
 
 void App::print_usage (bool all) {
-  printf ("usage: cadical [ <option> ... ] [ <input> [ <proof> ] ]\n"
+  printf ("usage: cadical-exhaust [ <option> ... ] [ <input> [ <proof> ] ]\n"
           "\n"
           "where '<option>' is one of the following common options:\n"
           "\n");
@@ -121,6 +121,7 @@ void App::print_usage (bool all) {
 #ifndef __WIN32
             "  -t <sec>       set wall clock time limit\n"
 #endif
+            "  -order <n>     only do an exhaustive search over vars 1 to n\n"
     );
   } else { // Print complete list of all options.
     printf (
@@ -137,6 +138,7 @@ void App::print_usage (bool all) {
 #ifndef __WIN32
         "  -t <sec>       set wall clock time limit\n"
 #endif
+        "  -order <n>     only do an exhaustive search over vars 1 to n\n"
         "\n"
         "Or '<option>' is one of the less common options\n"
         "\n"
@@ -638,7 +640,7 @@ int App::main (int argc, char **argv) {
 #ifndef QUIET
   if (!get ("quiet")) {
     solver->section ("banner");
-    solver->message ("%sCaDiCaL SAT Solver%s", tout.bright_magenta_code (),
+    solver->message ("%sCaDiCaL-exhaust SAT Solver%s", tout.bright_magenta_code (),
                      tout.normal_code ());
     solver->message ("%s%s%s", tout.bright_magenta_code (), copyright (),
                      tout.normal_code ());
