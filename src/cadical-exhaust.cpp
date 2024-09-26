@@ -513,7 +513,7 @@ int App::main (int argc, char **argv) {
         APPERR ("multiple argument '--order %d' and '--order %s'", order, argv[i]);
       else if (!parse_int_str (argv[i], order))
         APPERR ("invalid argument in '--order %s'", argv[i]);
-      else if (order < 0 || order > 40)
+      else if (order < 0)
         APPERR ("invalid order");
       else {
         order = stoi(argv[i]);
