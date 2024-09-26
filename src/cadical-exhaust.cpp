@@ -12,7 +12,7 @@
 #include <deque>
 #include <algorithm>
 
-#include "symbreak.hpp"
+#include "exhaustive.hpp"
 
 /*------------------------------------------------------------------------*/
 

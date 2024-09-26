@@ -1,4 +1,4 @@
-#include "symbreak.hpp"
+#include "exhaustive.hpp"
 #include <iostream>
 
 SymmetryBreaker::SymmetryBreaker(CaDiCaL::Solver * s, int order) : solver(s) {
@@ -18,7 +18,7 @@ SymmetryBreaker::SymmetryBreaker(CaDiCaL::Solver * s, int order) : solver(s) {
     std::cout << "c Running exhaustive search on " << n << " variables" << std::endl;
     // The root-level of the trail is always there
     current_trail.push_back(std::vector<int>());
-    // Observe the edge variables for orderly generation
+    // Observe the variables used for exhaustive generation
     for (int i = 0; i < n; i++) {
         solver->add_observed_var(i+1);
     }
