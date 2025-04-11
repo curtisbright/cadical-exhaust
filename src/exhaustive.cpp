@@ -1,7 +1,7 @@
 #include "exhaustive.hpp"
 #include <iostream>
 
-SymmetryBreaker::SymmetryBreaker(CaDiCaL::Solver * s, int order, bool only_neg) : solver(s) {
+ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg) : solver(s) {
     if (order == 0) {
         // No order provided; run exhaustive search on all variables
         n = s->vars();
@@ -25,7 +25,7 @@ SymmetryBreaker::SymmetryBreaker(CaDiCaL::Solver * s, int order, bool only_neg) 
     }
 }
 
-SymmetryBreaker::~SymmetryBreaker () {
+ExhaustiveSearch::~ExhaustiveSearch () {
     if (n != 0) {
         solver->disconnect_external_propagator ();
         delete [] assign;
@@ -34,7 +34,7 @@ SymmetryBreaker::~SymmetryBreaker () {
     }
 }
 
-void SymmetryBreaker::notify_assignment(int lit, bool is_fixed) {
+void ExhaustiveSearch::notify_assignment(int lit, bool is_fixed) {
     assign[abs(lit)-1] = (lit > 0 ? l_True : l_False);
     if (is_fixed) {
         fixed[abs(lit)-1] = true;
@@ -43,11 +43,11 @@ void SymmetryBreaker::notify_assignment(int lit, bool is_fixed) {
     }
 }
 
-void SymmetryBreaker::notify_new_decision_level () {
+void ExhaustiveSearch::notify_new_decision_level () {
     current_trail.push_back(std::vector<int>());
 }
 
-void SymmetryBreaker::notify_backtrack (size_t new_level) {
+void ExhaustiveSearch::notify_backtrack (size_t new_level) {
     while (current_trail.size() > new_level + 1) {
         for (const auto& lit: current_trail.back()) {
             const int x = abs(lit) - 1;
@@ -60,7 +60,7 @@ void SymmetryBreaker::notify_backtrack (size_t new_level) {
     }
 }
 
-bool SymmetryBreaker::cb_check_found_model (const std::vector<int> & model) {
+bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
     sol_count += 1;
 
 #ifdef VERBOSE
@@ -89,12 +89,12 @@ bool SymmetryBreaker::cb_check_found_model (const std::vector<int> & model) {
     return false;
 }
 
-bool SymmetryBreaker::cb_has_external_clause () {
+bool ExhaustiveSearch::cb_has_external_clause () {
     // No programmatic clause generated
     return !new_clauses.empty();
 }
 
-int SymmetryBreaker::cb_add_external_clause_lit () {
+int ExhaustiveSearch::cb_add_external_clause_lit () {
     if (new_clauses.empty()) return 0;
     else {
         assert(!new_clauses.empty());
@@ -110,9 +110,9 @@ int SymmetryBreaker::cb_add_external_clause_lit () {
     }
 }
 
-int SymmetryBreaker::cb_decide () { return 0; }
-int SymmetryBreaker::cb_propagate () { return 0; }
-int SymmetryBreaker::cb_add_reason_clause_lit (int plit) {
+int ExhaustiveSearch::cb_decide () { return 0; }
+int ExhaustiveSearch::cb_propagate () { return 0; }
+int ExhaustiveSearch::cb_add_reason_clause_lit (int plit) {
     (void)plit;
     return 0;
 };

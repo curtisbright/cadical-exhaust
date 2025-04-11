@@ -890,7 +890,7 @@ int App::main (int argc, char **argv) {
   } else {
     solver->section ("solving");
 
-    SymmetryBreaker se(solver, order, only_neg);
+    ExhaustiveSearch se(solver, order, only_neg);
 
     max_var = solver->active ();
     //std::cout << "c Nof vars: " << max_var << std::endl;

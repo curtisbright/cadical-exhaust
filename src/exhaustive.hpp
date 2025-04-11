@@ -4,7 +4,7 @@
 #define l_True 1
 #define l_Undef 2
 
-class SymmetryBreaker : CaDiCaL::ExternalPropagator {
+class ExhaustiveSearch : CaDiCaL::ExternalPropagator {
     CaDiCaL::Solver * solver;
     std::vector<std::vector<int>> new_clauses;
     std::deque<std::vector<int>> current_trail;
@@ -14,8 +14,8 @@ class SymmetryBreaker : CaDiCaL::ExternalPropagator {
     bool only_neg = false;
     long sol_count = 0;
 public:
-    SymmetryBreaker(CaDiCaL::Solver * s, int order, bool only_neg);
-    ~SymmetryBreaker ();
+    ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg);
+    ~ExhaustiveSearch ();
     void notify_assignment(int lit, bool is_fixed);
     void notify_new_decision_level ();
     void notify_backtrack (size_t new_level);
