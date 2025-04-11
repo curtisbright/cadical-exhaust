@@ -76,6 +76,8 @@ bool SymmetryBreaker::cb_check_found_model (const std::vector<int> & model) {
     }
 #ifdef VERBOSE
     std::cout << "0" << std::endl;
+#endif
+#ifdef PRINT_PROCESS_TIME
     std::cout << "c Process time: " << CaDiCaL::absolute_process_time() << " s" << std::endl;
 #endif
     new_clauses.push_back(clause);
