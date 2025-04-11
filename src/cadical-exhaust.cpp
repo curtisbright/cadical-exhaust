@@ -122,6 +122,7 @@ void App::print_usage (bool all) {
             "  -t <sec>       set wall clock time limit\n"
 #endif
             "  --order <n>    only do an exhaustive search over vars 1 to n\n"
+            "  --only-neg     only use negative literals in exhaustive blocking clauses\n"
     );
   } else { // Print complete list of all options.
     printf (
@@ -348,6 +349,7 @@ bool App::most_likely_existing_cnf_file (const char *path) {
 int App::main (int argc, char **argv) {
 
   int order = 0;
+  bool only_neg = false;
 
   // Handle options which lead to immediate exit first.
 
@@ -520,6 +522,10 @@ int App::main (int argc, char **argv) {
         std::cout << "c order = " << order << endl;
       }
     } 
+    else if (!strcmp (argv[i], "--only-neg")) {
+      only_neg = true;
+      std::cout << "c only-neg = true" << endl;
+    }
 #ifndef __WIN32
     else if (!strcmp (argv[i], "-t")) {
       if (++i == argc)
@@ -884,7 +890,7 @@ int App::main (int argc, char **argv) {
   } else {
     solver->section ("solving");
 
-    SymmetryBreaker se(solver, order);
+    SymmetryBreaker se(solver, order, only_neg);
 
     max_var = solver->active ();
     //std::cout << "c Nof vars: " << max_var << std::endl;

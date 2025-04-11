@@ -1,13 +1,14 @@
 #include "exhaustive.hpp"
 #include <iostream>
 
-SymmetryBreaker::SymmetryBreaker(CaDiCaL::Solver * s, int order) : solver(s) {
+SymmetryBreaker::SymmetryBreaker(CaDiCaL::Solver * s, int order, bool only_neg) : solver(s) {
     if (order == 0) {
         // No order provided; run exhaustive search on all variables
         n = s->vars();
     } else {
         n = order;
     }
+    this->only_neg = only_neg;
     assign = new int[n];
     fixed = new bool[n];
     solver->connect_external_propagator(this);
@@ -72,7 +73,9 @@ bool SymmetryBreaker::cb_check_found_model (const std::vector<int> & model) {
             std::cout << lit << " ";
         }
 #endif
-        clause.push_back(-lit);
+        if (lit > 0 || !only_neg) {
+            clause.push_back(-lit);
+        }
     }
 #ifdef VERBOSE
     std::cout << "0" << std::endl;

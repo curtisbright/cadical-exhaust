@@ -11,9 +11,10 @@ class SymmetryBreaker : CaDiCaL::ExternalPropagator {
     int * assign;
     bool * fixed;
     int n = 0;
+    bool only_neg = false;
     long sol_count = 0;
 public:
-    SymmetryBreaker(CaDiCaL::Solver * s, int order);
+    SymmetryBreaker(CaDiCaL::Solver * s, int order, bool only_neg);
     ~SymmetryBreaker ();
     void notify_assignment(int lit, bool is_fixed);
     void notify_new_decision_level ();
