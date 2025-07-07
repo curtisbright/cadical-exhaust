@@ -16,11 +16,11 @@ class ExhaustiveSearch : CaDiCaL::ExternalPropagator {
 public:
     ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg);
     ~ExhaustiveSearch ();
-    void notify_assignment(int lit, bool is_fixed);
+    void notify_assignment(const std::vector<int>& lits);
     void notify_new_decision_level ();
     void notify_backtrack (size_t new_level);
     bool cb_check_found_model (const std::vector<int> & model);
-    bool cb_has_external_clause ();
+    bool cb_has_external_clause (bool& is_forgettable);
     int cb_add_external_clause_lit ();
     int cb_decide ();
     int cb_propagate ();

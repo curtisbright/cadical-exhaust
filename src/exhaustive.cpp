@@ -10,11 +10,9 @@ ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg
     }
     this->only_neg = only_neg;
     assign = new int[n];
-    fixed = new bool[n];
     solver->connect_external_propagator(this);
     for (int i = 0; i < n; i++) {
         assign[i] = l_Undef;
-        fixed[i] = false;
     }
     std::cout << "c Running exhaustive search on " << n << " variables" << std::endl;
     // The root-level of the trail is always there
@@ -29,16 +27,13 @@ ExhaustiveSearch::~ExhaustiveSearch () {
     if (n != 0) {
         solver->disconnect_external_propagator ();
         delete [] assign;
-        delete [] fixed;
         printf("Number of solutions   : %ld\n", sol_count);
     }
 }
 
-void ExhaustiveSearch::notify_assignment(int lit, bool is_fixed) {
-    assign[abs(lit)-1] = (lit > 0 ? l_True : l_False);
-    if (is_fixed) {
-        fixed[abs(lit)-1] = true;
-    } else {
+void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
+    for(int lit : lits) {
+        assign[abs(lit)-1] = (lit > 0 ? l_True : l_False);
         current_trail.back().push_back(lit);
     }
 }
@@ -51,9 +46,6 @@ void ExhaustiveSearch::notify_backtrack (size_t new_level) {
     while (current_trail.size() > new_level + 1) {
         for (const auto& lit: current_trail.back()) {
             const int x = abs(lit) - 1;
-            // Don't remove literals that have been fixed
-            if(fixed[x])
-                continue;
             assign[x] = l_Undef;
         }
         current_trail.pop_back();
@@ -89,7 +81,7 @@ bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
     return false;
 }
 
-bool ExhaustiveSearch::cb_has_external_clause () {
+bool ExhaustiveSearch::cb_has_external_clause (bool& is_forgettable) {
     // No programmatic clause generated
     return !new_clauses.empty();
 }
