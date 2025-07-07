@@ -99,13 +99,14 @@ OPTION( flushint,        1e5,  1,2e9,0,0,1, "initial limit") \
 OPTION( forcephase,        0,  0,  1,0,0,1, "always use initial phase") \
 OPTION( frat,              0,  0,  2,0,0,1, "1=frat(lrat), 2=frat(drat)") \
 OPTION( idrup,             0,  0,  1,0,0,1, "incremental proof format") \
-OPTION( ilb,               1,  0,  1,0,0,1, "ILB (incremental lazy backtrack)") \
-OPTION( ilbassumptions,    1,  0,  1,0,0,1, "trail reuse for assumptions (ILB-like)") \
+OPTION( ilb,               0,  0,  1,0,0,1, "ILB (incremental lazy backtrack)") \
+OPTION( ilbassumptions,    0,  0,  1,0,0,1, "trail reuse for assumptions (ILB-like)") \
 OPTION( inprocessing,      1,  0,  1,0,0,1, "enable inprocessing") \
 OPTION( instantiate,       0,  0,  1,0,1,1, "variable instantiation") \
 OPTION( instantiateclslim, 3,  2,2e9,0,0,1, "minimum clause size") \
 OPTION( instantiateocclim, 1,  1,2e9,2,0,1, "maximum occurrence limit") \
 OPTION( instantiateonce,   1,  0,  1,0,0,1, "instantiate each clause once") \
+OPTION( lidrup,            0,  0,  1,0,0,1, "linear incremental proof format") \
 LOGOPT( log,               0,  0,  1,0,0,0, "enable logging") \
 LOGOPT( logsort,           0,  0,  1,0,0,0, "sort logged clauses") \
 OPTION( lrat,              0,  0,  1,0,0,1, "use LRAT proof format") \
@@ -123,7 +124,7 @@ OPTION( probereleff,      20,  1,1e5,1,0,1, "relative efficiency per mille") \
 OPTION( proberounds,       1,  1, 16,1,0,1, "probing rounds" ) \
 OPTION( profile,           2,  0,  4,0,0,0, "profiling level") \
 QUTOPT( quiet,             0,  0,  1,0,0,0, "disable all messages") \
-OPTION( radixsortlim,    800,  0,2e9,0,0,1, "radix sort limit") \
+OPTION( radixsortlim,     32,  0,2e9,0,0,1, "radix sort limit") \
 OPTION( realtime,          0,  0,  1,0,0,0, "real instead of process time") \
 OPTION( reduce,            1,  0,  1,0,0,1, "reduce useless clauses") \
 OPTION( reduceint,       300, 10,1e6,0,0,1, "reduce interval") \
@@ -147,7 +148,7 @@ OPTION( reverse,           0,  0,  1,0,0,1, "reverse variable ordering") \
 OPTION( score,             1,  0,  1,0,0,1, "use EVSIDS scores") \
 OPTION( scorefactor,     950,500,1e3,0,0,1, "score factor per mille") \
 OPTION( seed,              0,  0,2e9,0,0,1, "random seed") \
-OPTION( shrink,            3,  0,  3,0,0,1, "shrink conflict clause") \
+OPTION( shrink,            3,  0,  3,0,0,1, "shrink conflict clause (1=only with binary, 2=minimize when pulling, 3=full)") \
 OPTION( shrinkreap,        1,  0,  1,0,0,1, "use a reap for shrinking") \
 OPTION( shuffle,           0,  0,  1,0,0,1, "shuffle variables") \
 OPTION( shufflequeue,      1,  0,  1,0,0,1, "shuffle variable queue") \

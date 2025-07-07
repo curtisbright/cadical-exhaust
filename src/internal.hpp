@@ -70,6 +70,7 @@ extern "C" {
 #include "instantiate.hpp"
 #include "internal.hpp"
 #include "level.hpp"
+#include "lidruptracer.hpp"
 #include "limit.hpp"
 #include "logging.hpp"
 #include "lratbuilder.hpp"
@@ -172,6 +173,8 @@ struct Internal {
   bool external_prop;         // true if an external propagator is connected
   bool did_external_prop;     // true if ext. propagation happened
   bool external_prop_is_lazy; // true if the external propagator is lazy
+  bool forced_backt_allowed;  // external propagator can force backtracking
+  bool private_steps;         // no notification of ext. prop during these steps
   char rephased;              // last type of resetting phases
   Reluctant reluctant;        // restart counter in stable mode
   size_t vsize;               // actually allocated variable data size
@@ -215,10 +218,12 @@ struct Internal {
   vector<Watches> wtab;         // table of watches for all literals
   Clause *conflict;             // set in 'propagation', reset in 'analyze'
   Clause *ignore;               // ignored during 'vivify_propagate'
+  Clause *dummy_binary;         // Dummy binary clause for subsumption
   Clause *external_reason;      // used as reason at external propagations
   Clause *newest_clause;        // used in external_propagate
   bool force_no_backtrack;      // for new clauses with external propagator
   bool from_propagator;         // differentiate new clauses...
+  bool ext_clause_forgettable;  // Is new clause from propagator forgettable
   int tainted_literal;          // used for ILB
   size_t notified;           // next trail position to notify external prop
   Clause *probe_reason;      // set during probing
@@ -617,13 +622,12 @@ struct Internal {
   //
   bool minimize_literal (int lit, int depth = 0);
   void minimize_clause ();
-  void calculate_minimize_chain (int lit);
+  void calculate_minimize_chain (int lit, std::vector<int> &stack);
 
   // Learning from conflicts in 'analyze.cc'.
   //
   void learn_empty_clause ();
   void learn_unit_clause (int lit);
-  void learn_external_propagated_unit_clause (int lit);
 
   void bump_variable (int lit);
   void bump_variables ();
@@ -653,8 +657,6 @@ struct Internal {
 
   // Learning from external propagator in 'external_propagate.cpp'
   //
-  void elevate_lit_external (int, Clause *);
-  void elevate_original_unit (uint64_t, int);
   bool external_propagate ();
   bool external_check_solution ();
   void add_external_clause (int propagated_lit = 0,
@@ -664,19 +666,30 @@ struct Internal {
   Clause *wrapped_learn_external_reason_clause (int lit);
   void explain_external_propagations ();
   void explain_reason (int lit, Clause *, int &open);
-  void move_literal_to_watch (bool other_watch);
+  void move_literals_to_watch ();
   void handle_external_clause (Clause *);
   void notify_assignments ();
   void notify_decision ();
   void notify_backtrack (size_t new_level);
+  void force_backtrack (size_t new_level);
   int ask_decision ();
+  bool ask_external_clause ();
   void add_observed_var (int ilit);
   void remove_observed_var (int ilit);
   bool observed (int ilit) const;
   bool is_decision (int ilit);
   void check_watched_literal_invariants ();
   void set_tainted_literal ();
+  void renotify_trail_after_ilb ();
+  void renotify_trail_after_local_search ();
+  void renotify_full_trail ();
   void connect_propagator ();
+  void mark_garbage_external_forgettable (int64_t id);
+  bool is_external_forgettable (int64_t id);
+#ifndef NDEBUG  
+  bool get_merged_literals (std::vector<int>&);
+  void get_all_fixed_literals (std::vector<int>&);
+#endif
 
   // Use last learned clause to subsume some more.
   //
@@ -808,7 +821,8 @@ struct Internal {
   void flush_vivification_schedule (Vivifier &);
   bool consider_to_vivify_clause (Clause *candidate, bool redundant_mode);
   void vivify_analyze_redundant (Vivifier &, Clause *start, bool &);
-  void vivify_build_lrat (int, Clause *);
+  void vivify_build_lrat (int, Clause *,
+                          std::vector<std::tuple<int, Clause *, bool>> &);
   void vivify_chain_for_units (int lit, Clause *reason);
   bool vivify_all_decisions (Clause *candidate, int subsume);
   void vivify_post_process_analysis (Clause *candidate, int subsume);
@@ -1358,8 +1372,8 @@ struct Internal {
 
   double solve_time (); // accumulated time spent in 'solve ()'
 
-  double process_time (); // since solver was initialized
-  double real_time ();    // since solver was initialized
+  double process_time () const; // since solver was initialized
+  double real_time () const;    // since solver was initialized
 
   double time () { return opts.realtime ? real_time () : process_time (); }
 

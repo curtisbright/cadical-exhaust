@@ -1,3 +1,56 @@
+Version 2.1.0
+-------------
+
+- Major IPASIR-UP increment. Please be aware that some of these
+  changes affect the syntax of the API, and thus updating to this
+  version of CaDiCaL requires to modify the consuming code to 
+  accommodate to the new syntax:
+
+  - Notification of assignments is batched into arrays and no more fixed
+    flags are passed during notification (`breaking change`)
+  
+  - Allow clauses learned from the propagator to be deleted (see
+    `is_forgettable` parameter and `are_reasons_forgettable` Boolean flag)
+    (`breaking change`)
+  
+  - Added support to generate incremental proofs (LIDRUP) while 
+    using IPASIR-UP
+
+  - Users can force to backtrack during `cb_decide` (see function
+    `force_backtrack`)
+  
+  - Removed unnecessary notifications of backtrack during
+    inprocessing (supposed to solve issue #92).
+
+  - Call again `cb_propagate` if during final model checking a new
+    clause is added.
+
+- Added a new interface `FixedAssignmentListener`: Eagerly calls a
+  callback whenever a variable is fixed during search.
+
+Version 2.0.0
+-------------
+
+- We have now a `contrib` directory and for starters there our
+  `CadiCraig` interpolator, which goes through the `Tracer` API.
+
+- We moved back to use the C99 flexible array member feature in
+  `Clause` which however is not supported by all C++ compiler
+  configurations, particularly if compiling in pedantic mode.
+  Therefore the `configure` script checks for support of flexible
+  array members and also has a new `--no-flexible` option.
+
+- Added `Dockerfile` to support docker containers.
+
+- Added `--no-status` to skip printing "s SATISFIABLE" or "s
+  UNSATISFIABLE". This is useful for online proof checking.
+
+Version 1.9.5
+-------------
+
+- Removed an unexpected performance regression on the anniversary track
+  due to marking forward strengthened redundant clauses as used.
+
 Version 1.9.4
 -------------
 
@@ -45,6 +98,8 @@ Version 1.9.0
 
 - Making progress to formal 1.9 release with minor fixes for
   different platforms and compilers.
+
+- Refine IPASIR-UP based on feedback from users. 
 
 Version 1.8.0
 -------------

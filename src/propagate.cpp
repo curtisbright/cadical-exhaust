@@ -143,6 +143,7 @@ inline void Internal::search_assign (int lit, Clause *reason) {
   num_assigned++;
   if (!lit_level && !from_external)
     learn_unit_clause (lit); // increases 'stats.fixed'
+  assert (lit_level || !from_external);
   const signed char tmp = sign (lit);
   set_val (idx, tmp);
   assert (val (lit) > 0);  // Just a bit paranoid but useful.
@@ -516,6 +517,7 @@ void Internal::propergate () {
       const int other = lits[0] ^ lits[1] ^ lit;
       const signed char u = val (other);
 
+      // TODO: check if u == 0 can happen
       if (u > 0)
         continue;
       assert (u < 0);

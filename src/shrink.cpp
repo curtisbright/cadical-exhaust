@@ -267,6 +267,7 @@ Internal::shrink_block (std::vector<int>::reverse_iterator &rbegin_lits,
   assert (rbegin_lits >= clause.rbegin ());
   assert (rend_block < clause.rend ());
   assert (rbegin_lits < rend_block);
+  assert (opts.shrink);
 
 #ifdef LOGGING
 
@@ -279,8 +280,8 @@ Internal::shrink_block (std::vector<int>::reverse_iterator &rbegin_lits,
     LOG ("shrinking up to %u", max_trail);
 #endif
 
-  const bool resolve_large_clauses = (opts.shrink > 2);
-  bool failed = (opts.shrink == 0);
+  const bool resolve_large_clauses = (opts.shrink > 1);
+  bool failed = false;
   unsigned block_shrunken = 0;
   std::vector<int>::size_type minimized_start = minimized.size ();
   int uip = uip0;
@@ -445,6 +446,7 @@ void Internal::shrink_and_minimize_clause () {
 #if defined(LOGGING) || !defined(NDEBUG)
   const unsigned old_size = clause.size ();
 #endif
+  std::vector<int> stack;
   {
     std::vector<int>::size_type i = 1;
     for (std::vector<int>::size_type j = 1; j < clause.size (); ++j) {
@@ -454,7 +456,7 @@ void Internal::shrink_and_minimize_clause () {
         assert (j < old_clause_lrat.size ());
         assert (mini_chain.empty ());
         if (clause[j] != old_clause_lrat[j]) {
-          calculate_minimize_chain (-old_clause_lrat[j]);
+          calculate_minimize_chain (-old_clause_lrat[j], stack);
           for (auto p : mini_chain) {
             minimize_chain.push_back (p);
           }
