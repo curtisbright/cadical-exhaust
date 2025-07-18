@@ -25,6 +25,4 @@ public:
     int cb_decide ();
     int cb_propagate ();
     int cb_add_reason_clause_lit (int plit);
-    bool is_canonical(int k, int p[], int& x, int& y, int& i, bool opt_pseudo_test);
-    bool has_mus_subgraph(int k, int* P, int* p, int g);
 };
