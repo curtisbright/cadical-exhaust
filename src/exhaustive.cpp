@@ -36,6 +36,7 @@ void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
     //    assign[abs(lit)-1] = (lit > 0 ? l_True : l_False);
     //    current_trail.back().push_back(lit);
     //}
+    (void)lits;
 }
 
 void ExhaustiveSearch::notify_new_decision_level () {
@@ -50,6 +51,7 @@ void ExhaustiveSearch::notify_backtrack (size_t new_level) {
     //    }
     //    current_trail.pop_back();
     //}
+    (void)new_level;
 }
 
 bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
@@ -82,6 +84,7 @@ bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
 }
 
 bool ExhaustiveSearch::cb_has_external_clause (bool& is_forgettable) {
+    (void)is_forgettable;
     // No programmatic clause generated
     return !new_clauses.empty();
 }
