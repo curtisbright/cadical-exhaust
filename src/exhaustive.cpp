@@ -27,7 +27,7 @@ ExhaustiveSearch::~ExhaustiveSearch () {
     if (n != 0) {
         solver->disconnect_external_propagator ();
         //delete [] assign;
-        printf("Number of solutions   : %ld\n", sol_count);
+        std::cout << "c Number of solutions: " << sol_count << std::endl;
     }
 }
 
