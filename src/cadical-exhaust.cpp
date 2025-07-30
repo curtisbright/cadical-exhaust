@@ -140,6 +140,7 @@ void App::print_usage (bool all) {
         "  -t <sec>       set wall clock time limit\n"
 #endif
         "  --order <n>    only do an exhaustive search over vars 1 to n\n"
+        "  --only-neg     only use negative literals in exhaustive blocking clauses\n"
         "\n"
         "Or '<option>' is one of the less common options\n"
         "\n"
