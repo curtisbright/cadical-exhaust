@@ -1,6 +1,21 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
+CaDiCaL-exhaust: An Exhaustive Satisfiability Solver
+===============================================================================
+
+CaDiCaL-exhaust is a hack of CaDiCaL that can find all solutions of a SAT
+instance.  Once all solutions have been found, it reports UNSAT along with the
+number of found solutions.  Solutions are printed on the standard output and
+blocking clauses appear in DRAT proofs with a `t` prefix.  This is an extension
+of the DRAT format, so the proof cannot be verified by standard DRAT proof
+checkers.  A custom version of DRAT-trim that can verify such proofs can be
+found in the [DRAT-trim-t repo](https://github.com/curtisbright/drat-trim-t).
+
+To do exhaustive search over only the first n variables, call with `--order n`.
+
+-Curtis Bright
+
 CaDiCaL Simplified Satisfiability Solver
 ===============================================================================
 
