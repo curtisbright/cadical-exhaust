@@ -14,6 +14,13 @@ found in the [DRAT-trim-t repo](https://github.com/curtisbright/drat-trim-t).
 
 To do exhaustive search over only the first n variables, call with `--order n`.
 
+To only include negative literals in exhaustive blocking clauses, call with
+`--only-neg`.  (This optimization is safe when all solutions contain the same
+number of positive literals.)
+
+To write the list of solutions to the file `f` instead of the standard output,
+call with `--solfile <f>`.
+
 -Curtis Bright
 
 CaDiCaL Simplified Satisfiability Solver
