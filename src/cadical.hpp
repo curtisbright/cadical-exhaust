@@ -943,6 +943,8 @@ public:
   //
   static void build (FILE *file, const char *prefix = "c ");
 
+  void set_num_sol (int n);
+
 private:
   //==== start of state ====================================================
 

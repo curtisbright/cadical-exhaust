@@ -135,7 +135,8 @@ Report::Report (const char *h, int precision, int min, double value)
   REPORT ("glue", 0, 1, averages.current.glue.slow) \
   REPORT ("irredundant", 0, 4, stats.current.irredundant) \
   REPORT ("variables", 0, 3, active ()) \
-  REPORT ("remaining", -1, 2, REMAINING)
+  REPORT ("remaining", -1, 2, REMAINING) \
+  REPORT ("solutions", 0, 1, stats.num_sol)
 
 // Note, keep an empty line before this line (because of '\')!
 

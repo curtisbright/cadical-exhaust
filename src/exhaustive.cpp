@@ -57,6 +57,7 @@ void ExhaustiveSearch::notify_backtrack (size_t new_level) {
 
 bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
     sol_count += 1;
+    solver->set_num_sol(sol_count);
 
 #ifdef VERBOSE
     if (!solfile)

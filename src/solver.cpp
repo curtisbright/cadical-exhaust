@@ -1054,6 +1054,10 @@ int Solver::active () const {
   return res;
 }
 
+void Solver::set_num_sol (int n) {
+  internal->stats.num_sol = n;
+}
+
 int64_t Solver::redundant () const {
   TRACE ("redundant");
   REQUIRE_VALID_STATE ();
