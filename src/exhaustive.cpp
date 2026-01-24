@@ -1,7 +1,7 @@
 #include "exhaustive.hpp"
 #include <iostream>
 
-ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg) : solver(s) {
+ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg, FILE * solfile) : solver(s) {
     if (order == 0) {
         // No order provided; run exhaustive search on all variables
         n = s->vars();
@@ -9,6 +9,7 @@ ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg
         n = order;
     }
     this->only_neg = only_neg;
+    this->solfile = solfile;
     //assign = new int[n];
     solver->connect_external_propagator(this);
     //for (int i = 0; i < n; i++) {
@@ -58,13 +59,17 @@ bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
     sol_count += 1;
 
 #ifdef VERBOSE
-    std::cout << "c New solution: ";
+    if (!solfile)
+      std::cout << "c New solution: ";
 #endif
     std::vector<int> clause;
     for (const auto& lit: model) {
 #ifdef VERBOSE
         if (lit > 0) {
-            std::cout << lit << " ";
+            if(!solfile)
+              std::cout << lit << " ";
+            else
+              fprintf(solfile, "%d ", lit);
         }
 #endif
         if (lit > 0 || !only_neg) {
@@ -72,7 +77,10 @@ bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
         }
     }
 #ifdef VERBOSE
-    std::cout << "0" << std::endl;
+    if(!solfile)
+      std::cout << "0" << std::endl;
+    else
+      fprintf(solfile, "0\n");
 #endif
 #ifdef PRINT_PROCESS_TIME
     std::cout << "c Process time: " << CaDiCaL::absolute_process_time() << " s" << std::endl;

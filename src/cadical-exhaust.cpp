@@ -351,6 +351,7 @@ int App::main (int argc, char **argv) {
 
   int order = 0;
   bool only_neg = false;
+  FILE * solfile = NULL;
 
   // Handle options which lead to immediate exit first.
 
@@ -522,7 +523,17 @@ int App::main (int argc, char **argv) {
         order = stoi(argv[i]);
         std::cout << "c order = " << order << endl;
       }
-    } 
+    } else if (!strcmp (argv[i], "--solfile")) {
+      if (++i == argc)
+        APPERR ("argument to '--solfile' missing");
+      else if (solfile != NULL)
+        APPERR ("multiple argument to '--solfile'");
+      else {
+        solfile = fopen (argv[i], "w");
+        if (!solfile)
+          APPERR ("could not write solfile to '%s'", argv[i]);
+      }
+    }
     else if (!strcmp (argv[i], "--only-neg")) {
       only_neg = true;
       std::cout << "c only-neg = true" << endl;
@@ -891,7 +902,7 @@ int App::main (int argc, char **argv) {
   } else {
     solver->section ("solving");
 
-    ExhaustiveSearch se(solver, order, only_neg);
+    ExhaustiveSearch se(solver, order, only_neg, solfile);
 
     max_var = solver->active ();
     //std::cout << "c Nof vars: " << max_var << std::endl;
@@ -957,6 +968,9 @@ int App::main (int argc, char **argv) {
   if (time_limit > 0)
     alarm (0);
 #endif
+
+  if (solfile)
+    fclose(solfile);
 
   return res;
 }
