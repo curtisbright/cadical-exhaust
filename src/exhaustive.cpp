@@ -2,7 +2,7 @@
 #include <iostream>
 #include <deque>
 
-ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg) : solver(s) {
+ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg, FILE * solfile) : solver(s) {
     if (order == 0) {
         // No order provided; run exhaustive search on all variables
         n = s->vars();
@@ -10,6 +10,7 @@ ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg
         n = order;
     }
     this->only_neg = only_neg;
+    this->solfile = solfile;
     
     // Initialize assignment tracking (0 means unassigned)
     assignment.assign(n, 0);
@@ -84,7 +85,8 @@ void ExhaustiveSearch::block_partial_solution() {
     sol_count++;
 
 #ifdef VERBOSE
-    std::cout << "c New partial solution blocked: ";
+    if (!solfile)
+      std::cout << "c New solution: ";
 #endif
     
     std::vector<int> clause;
@@ -102,7 +104,10 @@ void ExhaustiveSearch::block_partial_solution() {
         
 #ifdef VERBOSE
         if (lit > 0) {
-            std::cout << (i+1) << " ";
+            if(!solfile)
+              std::cout << (i+1) << " ";
+            else
+              fprintf(solfile, "%d ", (i+1));
         }
 #endif
         
@@ -113,7 +118,10 @@ void ExhaustiveSearch::block_partial_solution() {
     }
     
 #ifdef VERBOSE
-    std::cout << "0" << std::endl;
+    if(!solfile)
+      std::cout << "0" << std::endl;
+    else
+      fprintf(solfile, "0\n");
 #endif
 #ifdef PRINT_PROCESS_TIME
     std::cout << "c Process time: " << CaDiCaL::absolute_process_time() << " s" << std::endl;
