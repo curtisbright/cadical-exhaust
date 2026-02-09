@@ -82,7 +82,7 @@ void ExhaustiveSearch::notify_backtrack (size_t new_level) {
         
         // Unassign variables that were assigned above the new level
         for (int i = 0; i < n; i++) {
-            if (assigned_at_level[i] > new_level) {
+            if (assigned_at_level[i] > (int)new_level) {
                 assignment[i] = 0;
                 assigned_at_level[i] = -1;
             }
