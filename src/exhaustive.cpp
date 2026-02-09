@@ -14,9 +14,10 @@ ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg
     
     // Initialize assignment tracking (0 means unassigned)
     assignment.assign(n, 0);
+    assigned_at_level.assign(n, -1); 
     
-    // The root level trail
-    trail.push_back(std::vector<int>());
+    // The root level
+    assigned_count_per_level.push_back(0);
     
     solver->connect_external_propagator(this);
     
@@ -36,6 +37,8 @@ ExhaustiveSearch::~ExhaustiveSearch () {
 }
 
 void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
+    int current_level = assigned_count_per_level.size() - 1;
+
     // Track assignments of observed variables
     for (int lit : lits) {
         int var = abs(lit);
@@ -44,10 +47,11 @@ void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
             if (assignment[idx] == 0) {  // Not yet assigned
                 // Store the signed literal
                 assignment[idx] = lit;
+                assigned_at_level[idx] = current_level;
                 assigned_count++;
                 
-                // Track this variable at the current level
-                trail.back().push_back(var);
+                // Update count at current level
+                assigned_count_per_level[current_level]++;
             }
         }
     }
@@ -60,24 +64,29 @@ void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
 }
 
 void ExhaustiveSearch::notify_new_decision_level () {
-    trail.push_back(std::vector<int>());
+    assigned_count_per_level.push_back(0);
 }
 
 void ExhaustiveSearch::notify_backtrack (size_t new_level) {
-    // Unassign variables from backtracked levels
-    while (trail.size() > new_level + 1) {
-        // Unassign all variables from this level
-        for (int var : trail.back()) {
-            int idx = var - 1;
-            assignment[idx] = 0;  // Mark as unassigned
-            assigned_count--;
-        }
-        trail.pop_back();
+    // Remove levels above new_level
+    while (assigned_count_per_level.size() > new_level + 1) {
+        // Mark variables assigned at this level as unassigned
+        int count_at_level = assigned_count_per_level.back();
+        assigned_count_per_level.pop_back();
+        assigned_count -= count_at_level;
     }
     
     // Reset partial solution flag if we're no longer complete
     if (assigned_count < n) {
         partial_solution_found = false;
+        
+        // Unassign variables that were assigned above the new level
+        for (int i = 0; i < n; i++) {
+            if (assigned_at_level[i] > new_level) {
+                assignment[i] = 0;
+                assigned_at_level[i] = -1;
+            }
+        }
     }
 }
 
@@ -96,7 +105,6 @@ void ExhaustiveSearch::block_partial_solution() {
     for (int i = 0; i < n; i++) {
         int lit = assignment[i];
         
-        // Check that variable is assigned
         assert(lit != 0 && "Variable is unassigned when blocking!");
         
 #ifdef VERBOSE
