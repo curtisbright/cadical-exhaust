@@ -41,18 +41,15 @@ void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
 
     // Track assignments of observed variables
     for (int lit : lits) {
-        int var = abs(lit);
-        if (var <= n) {  // Only track observed variables (1 to n)
-            int idx = var - 1;
-            if (assignment[idx] == 0) {  // Not yet assigned
-                // Store the signed literal
-                assignment[idx] = lit;
-                assigned_at_level[idx] = current_level;
-                assigned_count++;
-                
-                // Update count at current level
-                assigned_count_per_level[current_level]++;
-            }
+        int idx = abs(lit) - 1;
+        if (assignment[idx] == 0) {  // Not yet assigned
+            // Store the signed literal
+            assignment[idx] = lit;
+            assigned_at_level[idx] = current_level;
+            assigned_count++;
+            
+            // Update count at current level
+            assigned_count_per_level[current_level]++;
         }
     }
     
