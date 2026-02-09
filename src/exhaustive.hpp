@@ -14,7 +14,9 @@ class ExhaustiveSearch : CaDiCaL::ExternalPropagator {
     
     // Track assignments for observed variables
     std::vector<int> assignment;                 // Current assignment: signed literal or 0 for unassigned
-    std::deque<std::vector<int>> trail;          // Variables assigned at each decision level
+    std::vector<int> assigned_at_level;          // Level at which each variable was assigned (-1 if unassigned)
+    std::deque<int> assigned_count_per_level;    // Count of assigned observed variables at each level
+
     int assigned_count = 0;                      // Number of assigned observed variables
     bool partial_solution_found = false;         // Flag to prevent duplicate blocking
     
