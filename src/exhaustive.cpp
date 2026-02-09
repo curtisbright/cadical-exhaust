@@ -97,10 +97,7 @@ void ExhaustiveSearch::block_partial_solution() {
         int lit = assignment[i];
         
         // Check that variable is assigned
-        if (lit == 0) {
-            std::cerr << "ERROR: Variable " << (i+1) << " is unassigned when blocking!" << std::endl;
-            continue;
-        }
+        assert(lit != 0 && "Variable is unassigned when blocking!");
         
 #ifdef VERBOSE
         if (lit > 0) {
