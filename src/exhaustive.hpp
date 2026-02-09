@@ -2,6 +2,10 @@
 #include <deque>
 #include <vector>
 
+#define l_False 0
+#define l_True 1
+#define l_Undef 2
+
 class ExhaustiveSearch : CaDiCaL::ExternalPropagator {
     CaDiCaL::Solver * solver;
     std::deque<std::vector<int>> clause_queue;  // Queue for blocking clauses
@@ -18,8 +22,10 @@ class ExhaustiveSearch : CaDiCaL::ExternalPropagator {
     bool only_neg = false;
     long sol_count = 0;
     
+    FILE * solfile;
+    
 public:
-    ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg);
+    ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg, FILE * solfile);
     ~ExhaustiveSearch ();
     void notify_assignment(const std::vector<int>& lits);
     void notify_new_decision_level ();
