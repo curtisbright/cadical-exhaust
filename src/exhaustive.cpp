@@ -1,32 +1,28 @@
 #include "exhaustive.hpp"
 #include <iostream>
 #include <deque>
+#include <cassert>
+
+// TODO: add back comments!
 
 ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg, FILE * solfile) : solver(s) {
-    if (order == 0) {
-        // No order provided; run exhaustive search on all variables
-        n = s->vars();
-    } else {
+    if (order == 0)
+        n = s->vars(); // No order provided; run exhaustive search on all variables
+    else 
         n = order;
-    }
+
     this->only_neg = only_neg;
     this->solfile = solfile;
     
-    // Initialize assignment tracking (0 means unassigned)
     assignment.assign(n, 0);
-    assigned_at_level.assign(n, -1); 
-    
-    // The root level
-    assigned_count_per_level.push_back(0);
+    assignments_by_level.push_back({});
     
     solver->connect_external_propagator(this);
     
     std::cout << "c Running exhaustive search on " << n << " variables" << std::endl;
     
-    // Observe the variables used for exhaustive generation
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
         solver->add_observed_var(i+1);
-    }
 }
 
 ExhaustiveSearch::~ExhaustiveSearch () {
@@ -37,54 +33,38 @@ ExhaustiveSearch::~ExhaustiveSearch () {
 }
 
 void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
-    int current_level = assigned_count_per_level.size() - 1;
-
-    // Track assignments of observed variables
-    for (int lit : lits) {
+    for (int lit : lits) { // Track assignments of observed variables
         int idx = abs(lit) - 1;
-        if (assignment[idx] == 0) {  // Not yet assigned
-            // Store the signed literal
-            assignment[idx] = lit;
-            assigned_at_level[idx] = current_level;
-            assigned_count++;
-            
-            // Update count at current level
-            assigned_count_per_level[current_level]++;
+        if (assignment[idx] == 0) { // Variable not yet assigned
+            assignment[idx] = lit; // Store the signed literal
+            assigned_count++; // Increment total assigned variables
+            assignments_by_level.back().push_back(lit); // Store when this literal was assigned
         }
-    }
+    }    
     
-    // Check if all observed variables are assigned
-    if (assigned_count == n && !partial_solution_found) {
+    if (assigned_count == n && !partial_solution_found) { // Found all assignments and no solution found
         partial_solution_found = true;
         block_partial_solution();
     }
 }
 
 void ExhaustiveSearch::notify_new_decision_level () {
-    assigned_count_per_level.push_back(0);
+    assignments_by_level.push_back({}); // Add new vector to track history
 }
 
 void ExhaustiveSearch::notify_backtrack (size_t new_level) {
-    // Remove levels above new_level
-    while (assigned_count_per_level.size() > new_level + 1) {
-        // Mark variables assigned at this level as unassigned
-        int count_at_level = assigned_count_per_level.back();
-        assigned_count_per_level.pop_back();
-        assigned_count -= count_at_level;
+    while (assignments_by_level.size() > new_level + 1) {
+        std::vector<int>& lits_to_undo = assignments_by_level.back(); // History to wipe
+        for (int lit : lits_to_undo) {
+            int idx = abs(lit) - 1;
+            assignment[idx] = 0; 
+            assigned_count--;
+        }
+        assignments_by_level.pop_back(); // Remove history from list
     }
     
-    // Reset partial solution flag if we're no longer complete
-    if (assigned_count < n) {
+    if (assigned_count < n) // No longer have all assignments
         partial_solution_found = false;
-        
-        // Unassign variables that were assigned above the new level
-        for (int i = 0; i < n; i++) {
-            if (assigned_at_level[i] > (int)new_level) {
-                assignment[i] = 0;
-                assigned_at_level[i] = -1;
-            }
-        }
-    }
 }
 
 void ExhaustiveSearch::block_partial_solution() {
@@ -94,14 +74,13 @@ void ExhaustiveSearch::block_partial_solution() {
     if (!solfile)
       std::cout << "c New solution: ";
 #endif
-    
+
     std::vector<int> clause;
     clause.reserve(n + 1);
     
-    // Create blocking clause from tracked assignments
     for (int i = 0; i < n; i++) {
         int lit = assignment[i];
-        
+
         assert(lit != 0 && "Variable is unassigned when blocking!");
         
 #ifdef VERBOSE
@@ -112,44 +91,35 @@ void ExhaustiveSearch::block_partial_solution() {
               fprintf(solfile, "%d ", (i+1));
         }
 #endif
-        
-        // Block this assignment by negating the literal
-        if (lit > 0 || !only_neg) {
+        if (lit > 0 || !only_neg)
             clause.push_back(-lit);
-        }
     }
     
 #ifdef VERBOSE
-    if(!solfile)
-      std::cout << "0" << std::endl;
-    else
-      fprintf(solfile, "0\n");
+    if(!solfile) 
+        std::cout << "0" << std::endl;
+    else 
+        fprintf(solfile, "0\n");
 #endif
-#ifdef PRINT_PROCESS_TIME
-    std::cout << "c Process time: " << CaDiCaL::absolute_process_time() << " s" << std::endl;
-#endif
-    
+
     new_clauses.push_back(clause);
     solver->add_trusted_clause(clause);
 }
 
 bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
-    // When using notify_assignment for blocking, we can just return false
-    // to continue searching, as blocking is already handled
     (void)model;
     return false;
 }
 
 bool ExhaustiveSearch::cb_has_external_clause (bool& is_forgettable) {
     (void)is_forgettable;
-    // No programmatic clause generated
     return !new_clauses.empty();
 }
 
 int ExhaustiveSearch::cb_add_external_clause_lit () {
-    if (new_clauses.empty()) return 0;
+    if (new_clauses.empty()) 
+        return 0;
     else {
-        assert(!new_clauses.empty());
         size_t clause_idx = new_clauses.size() - 1;
         if (new_clauses[clause_idx].empty()) {
             new_clauses.pop_back();
@@ -167,4 +137,4 @@ int ExhaustiveSearch::cb_propagate () { return 0; }
 int ExhaustiveSearch::cb_add_reason_clause_lit (int plit) {
     (void)plit;
     return 0;
-};
+}
