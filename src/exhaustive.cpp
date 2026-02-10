@@ -129,8 +129,8 @@ void ExhaustiveSearch::block_partial_solution() {
     std::cout << "c Process time: " << CaDiCaL::absolute_process_time() << " s" << std::endl;
 #endif
     
-    clause.push_back(0);
-    clause_queue.push_back(std::move(clause));
+    new_clauses.push_back(clause);
+    solver->add_trusted_clause(clause);
 }
 
 bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
@@ -141,23 +141,25 @@ bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
 }
 
 bool ExhaustiveSearch::cb_has_external_clause (bool& is_forgettable) {
-    if (clause_queue.empty()) {
-        return false;
-    }
-    
-    is_forgettable = false;
-    cur_clause = std::move(clause_queue.front());
-    clause_queue.pop_front();
-    cur_pos = 0;
-    
-    return true;
+    (void)is_forgettable;
+    // No programmatic clause generated
+    return !new_clauses.empty();
 }
 
 int ExhaustiveSearch::cb_add_external_clause_lit () {
-    if (cur_pos >= cur_clause.size()) {
-        return 0;
+    if (new_clauses.empty()) return 0;
+    else {
+        assert(!new_clauses.empty());
+        size_t clause_idx = new_clauses.size() - 1;
+        if (new_clauses[clause_idx].empty()) {
+            new_clauses.pop_back();
+            return 0;
+        }
+
+        int lit = new_clauses[clause_idx].back();
+        new_clauses[clause_idx].pop_back();
+        return lit;
     }
-    return cur_clause[cur_pos++];
 }
 
 int ExhaustiveSearch::cb_decide () { return 0; }
