@@ -4,15 +4,12 @@
 
 class ExhaustiveSearch : CaDiCaL::ExternalPropagator {
     CaDiCaL::Solver * solver;
-    std::vector<std::vector<int>> new_clauses;  // Queue for blocking clauses
-    
-    // Track assignments for observed variables
-    std::vector<int> assignment;                 // Current assignment: signed literal or 0 for unassigned
-    std::vector<int> assigned_at_level;          // Level at which each variable was assigned (-1 if unassigned)
-    std::deque<int> assigned_count_per_level;    // Count of assigned observed variables at each level
+    std::vector<std::vector<int>> new_clauses;          // Queue for blocking clauses
+    std::vector<int> assignment;                        // Current assignment: signed literal or 0 for unassigned
+    std::deque<std::vector<int>> assignments_by_level;  // History of assignment: vector of literals assigned at each level
 
-    int assigned_count = 0;                      // Number of assigned observed variables
-    bool partial_solution_found = false;         // Flag to prevent duplicate blocking
+    int assigned_count = 0;                 // Number of assigned observed variables
+    bool partial_solution_found = false;    // Flag to prevent duplicate blocking
     
     int n = 0;
     bool only_neg = false;
@@ -34,5 +31,5 @@ public:
     int cb_add_reason_clause_lit (int plit);
     
 private:
-    void block_partial_solution();  // Block the current partial assignment
+    void block_partial_solution(); // Block the current partial assignment
 };
