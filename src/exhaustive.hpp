@@ -5,8 +5,6 @@
 class ExhaustiveSearch : CaDiCaL::ExternalPropagator {
     CaDiCaL::Solver * solver;
     std::vector<std::vector<int>> new_clauses;  // Queue for blocking clauses
-    std::vector<int> cur_clause;                 // Current clause being added
-    size_t cur_pos = 0;                          // Position in current clause
     
     // Track assignments for observed variables
     std::vector<int> assignment;                 // Current assignment: signed literal or 0 for unassigned
