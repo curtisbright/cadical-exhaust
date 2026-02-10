@@ -3,8 +3,6 @@
 #include <deque>
 #include <cassert>
 
-// TODO: add back comments!
-
 ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg, FILE * solfile) : solver(s) {
     if (order == 0)
         n = s->vars(); // No order provided; run exhaustive search on all variables
