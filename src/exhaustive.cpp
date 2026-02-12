@@ -10,14 +10,14 @@ ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg
     }
     this->only_neg = only_neg;
     this->solfile = solfile;
-    //assign = new int[n];
+    assign = new char[n];
     solver->connect_external_propagator(this);
-    //for (int i = 0; i < n; i++) {
-    //    assign[i] = l_Undef;
-    //}
+    for (int i = 0; i < n; i++) {
+        assign[i] = l_Undef;
+    }
     std::cout << "c Running exhaustive search on " << n << " variables" << std::endl;
     // The root-level of the trail is always there
-    //current_trail.push_back(std::vector<int>());
+    current_trail.push_back(std::vector<int>());
     // Observe the variables used for exhaustive generation
     for (int i = 0; i < n; i++) {
         solver->add_observed_var(i+1);
@@ -27,35 +27,25 @@ ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg
 ExhaustiveSearch::~ExhaustiveSearch () {
     if (n != 0) {
         solver->disconnect_external_propagator ();
-        //delete [] assign;
+        delete [] assign;
         std::cout << "c Number of solutions: " << sol_count << std::endl;
     }
 }
 
 void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
-    //for(int lit : lits) {
-    //    assign[abs(lit)-1] = (lit > 0 ? l_True : l_False);
-    //    current_trail.back().push_back(lit);
-    //}
-    (void)lits;
-}
+    for(int lit : lits) {
+        if (assign[abs(lit)-1] == l_Undef) {
+            num_assign++;
+            assign[abs(lit)-1] = (lit > 0 ? l_True : l_False);
+            current_trail.back().push_back(lit);
+        }
+    }
 
-void ExhaustiveSearch::notify_new_decision_level () {
-    //current_trail.push_back(std::vector<int>());
-}
+    if (num_assign < n) {
+        return;
+    }
 
-void ExhaustiveSearch::notify_backtrack (size_t new_level) {
-    //while (current_trail.size() > new_level + 1) {
-    //    for (const auto& lit: current_trail.back()) {
-    //        const int x = abs(lit) - 1;
-    //        assign[x] = l_Undef;
-    //    }
-    //    current_trail.pop_back();
-    //}
-    (void)new_level;
-}
-
-bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
+    // If all observed variables have been assigned then learn a blocking clause
     sol_count += 1;
     solver->set_num_sol(sol_count);
 
@@ -64,7 +54,8 @@ bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
       std::cout << "c New solution: ";
 #endif
     std::vector<int> clause;
-    for (const auto& lit: model) {
+    for (int i = 0; i < n; i++) {
+        const int lit = (i+1) * (assign[i] ? 1 : -1);
 #ifdef VERBOSE
         if (lit > 0) {
             if(!solfile)
@@ -88,7 +79,25 @@ bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
 #endif
     new_clauses.push_back(clause);
     solver->add_trusted_clause(clause);
+}
 
+void ExhaustiveSearch::notify_new_decision_level () {
+    current_trail.push_back(std::vector<int>());
+}
+
+void ExhaustiveSearch::notify_backtrack (size_t new_level) {
+    while (current_trail.size() > new_level + 1) {
+        for (const auto& lit: current_trail.back()) {
+            const int x = abs(lit) - 1;
+            assign[x] = l_Undef;
+            num_assign--;
+        }
+        current_trail.pop_back();
+    }
+}
+
+bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
+    (void)model;
     return false;
 }
 

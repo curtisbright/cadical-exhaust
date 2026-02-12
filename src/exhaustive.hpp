@@ -7,8 +7,9 @@
 class ExhaustiveSearch : CaDiCaL::ExternalPropagator {
     CaDiCaL::Solver * solver;
     std::vector<std::vector<int>> new_clauses;
-    //std::deque<std::vector<int>> current_trail;
-    //int * assign;
+    std::vector<std::vector<int>> current_trail;
+    int num_assign = 0;
+    char * assign;
     //bool * fixed;
     int n = 0;
     bool only_neg = false;
