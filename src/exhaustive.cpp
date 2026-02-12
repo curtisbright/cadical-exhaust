@@ -50,18 +50,20 @@ void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
     solver->set_num_sol(sol_count);
 
 #ifdef VERBOSE
-    if (!solfile)
-      std::cout << "c New solution: ";
+    if (!solfile) {
+        std::cout << "c New solution: ";
+    }
 #endif
     std::vector<int> clause;
     for (int i = 0; i < n; i++) {
         const int lit = (i+1) * (assign[i] ? 1 : -1);
 #ifdef VERBOSE
         if (lit > 0) {
-            if(!solfile)
-              std::cout << lit << " ";
-            else
-              fprintf(solfile, "%d ", lit);
+            if(!solfile) {
+                std::cout << lit << " ";
+            } else {
+                fprintf(solfile, "%d ", lit);
+            }
         }
 #endif
         if (lit > 0 || !only_neg) {
@@ -69,10 +71,11 @@ void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
         }
     }
 #ifdef VERBOSE
-    if(!solfile)
-      std::cout << "0" << std::endl;
-    else
-      fprintf(solfile, "0\n");
+    if(!solfile) {
+        std::cout << "0" << std::endl;
+    } else {
+        fprintf(solfile, "0\n");
+    }
 #endif
 #ifdef PRINT_PROCESS_TIME
     std::cout << "c Process time: " << CaDiCaL::absolute_process_time() << " s" << std::endl;
