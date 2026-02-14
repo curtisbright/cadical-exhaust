@@ -15,6 +15,9 @@ class ExhaustiveSearch : CaDiCaL::ExternalPropagator {
     bool only_neg = false;
     long sol_count = 0;
     FILE * solfile;
+#ifdef PRINT_CALLBACK_TIME
+    double callback_time = 0;
+#endif
 public:
     ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg, FILE * solfile);
     ~ExhaustiveSearch ();

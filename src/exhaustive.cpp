@@ -29,10 +29,17 @@ ExhaustiveSearch::~ExhaustiveSearch () {
         solver->disconnect_external_propagator ();
         delete [] assign;
         std::cout << "c Number of solutions: " << sol_count << std::endl;
+#ifdef PRINT_CALLBACK_TIME
+        std::cout << "c Time spent in IPASIR-UP callbacks: " << callback_time << " sec" << std::endl;
+#endif
     }
 }
 
 void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
+#ifdef PRINT_CALLBACK_TIME
+    clock_t begin = clock();
+#endif
+
     for(int lit : lits) {
         if (assign[abs(lit)-1] == l_Undef) {
             num_assign++;
@@ -42,6 +49,9 @@ void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
     }
 
     if (num_assign < n) {
+#ifdef PRINT_CALLBACK_TIME
+        callback_time += (double)(clock() - begin) / CLOCKS_PER_SEC;
+#endif
         return;
     }
 
@@ -82,13 +92,26 @@ void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
 #endif
     new_clauses.push_back(clause);
     solver->add_trusted_clause(clause);
+
+#ifdef PRINT_CALLBACK_TIME
+    callback_time += (double)(clock() - begin) / CLOCKS_PER_SEC;
+#endif
 }
 
 void ExhaustiveSearch::notify_new_decision_level () {
+#ifdef PRINT_CALLBACK_TIME
+    clock_t begin = clock();
+#endif
     current_trail.push_back(std::vector<int>());
+#ifdef PRINT_CALLBACK_TIME
+    callback_time += (double)(clock() - begin) / CLOCKS_PER_SEC;
+#endif
 }
 
 void ExhaustiveSearch::notify_backtrack (size_t new_level) {
+#ifdef PRINT_CALLBACK_TIME
+    clock_t begin = clock();
+#endif
     while (current_trail.size() > new_level + 1) {
         for (const auto& lit: current_trail.back()) {
             const int x = abs(lit) - 1;
@@ -97,6 +120,9 @@ void ExhaustiveSearch::notify_backtrack (size_t new_level) {
         }
         current_trail.pop_back();
     }
+#ifdef PRINT_CALLBACK_TIME
+    callback_time += (double)(clock() - begin) / CLOCKS_PER_SEC;
+#endif
 }
 
 bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
@@ -111,6 +137,9 @@ bool ExhaustiveSearch::cb_has_external_clause (bool& is_forgettable) {
 }
 
 int ExhaustiveSearch::cb_add_external_clause_lit () {
+#ifdef PRINT_CALLBACK_TIME
+    clock_t begin = clock();
+#endif
     if (new_clauses.empty()) return 0;
     else {
         assert(!new_clauses.empty());
@@ -124,6 +153,9 @@ int ExhaustiveSearch::cb_add_external_clause_lit () {
         new_clauses[clause_idx].pop_back();
         return lit;
     }
+#ifdef PRINT_CALLBACK_TIME
+    callback_time += (double)(clock() - begin) / CLOCKS_PER_SEC;
+#endif
 }
 
 int ExhaustiveSearch::cb_decide () { return 0; }
