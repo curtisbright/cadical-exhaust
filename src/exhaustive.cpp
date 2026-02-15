@@ -39,7 +39,6 @@ void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
 #ifdef PRINT_CALLBACK_TIME
     clock_t begin = clock();
 #endif
-
     for(int lit : lits) {
         if (assign[abs(lit)-1] == l_Undef) {
             num_assign++;
@@ -47,52 +46,6 @@ void ExhaustiveSearch::notify_assignment(const std::vector<int>& lits) {
             current_trail.back().push_back(lit);
         }
     }
-
-    if (num_assign < n) {
-#ifdef PRINT_CALLBACK_TIME
-        callback_time += (double)(clock() - begin) / CLOCKS_PER_SEC;
-#endif
-        return;
-    }
-
-    // If all observed variables have been assigned then learn a blocking clause
-    sol_count += 1;
-    solver->set_num_sol(sol_count);
-
-#ifdef VERBOSE
-    if (!solfile) {
-        std::cout << "c New solution: ";
-    }
-#endif
-    std::vector<int> clause;
-    for (int i = 0; i < n; i++) {
-        const int lit = (i+1) * (assign[i] ? 1 : -1);
-#ifdef VERBOSE
-        if (lit > 0) {
-            if(!solfile) {
-                std::cout << lit << " ";
-            } else {
-                fprintf(solfile, "%d ", lit);
-            }
-        }
-#endif
-        if (lit > 0 || !only_neg) {
-            clause.push_back(-lit);
-        }
-    }
-#ifdef VERBOSE
-    if(!solfile) {
-        std::cout << "0" << std::endl;
-    } else {
-        fprintf(solfile, "0\n");
-    }
-#endif
-#ifdef PRINT_PROCESS_TIME
-    std::cout << "c Process time: " << CaDiCaL::absolute_process_time() << " s" << std::endl;
-#endif
-    new_clauses.push_back(clause);
-    solver->add_trusted_clause(clause);
-
 #ifdef PRINT_CALLBACK_TIME
     callback_time += (double)(clock() - begin) / CLOCKS_PER_SEC;
 #endif
@@ -132,8 +85,52 @@ bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
 
 bool ExhaustiveSearch::cb_has_external_clause (bool& is_forgettable) {
     (void)is_forgettable;
-    // No programmatic clause generated
-    return !new_clauses.empty();
+#ifdef PRINT_CALLBACK_TIME
+    clock_t begin = clock();
+#endif
+    // If not all observed variables have been assigned then no blocking clause to learn
+    if (num_assign < n) return false;
+    // If all observed variables have been assigned then learn a blocking clause
+    sol_count += 1;
+    solver->set_num_sol(sol_count);
+
+#ifdef VERBOSE
+    if (!solfile) {
+        std::cout << "c New solution: ";
+    }
+#endif
+    std::vector<int> clause;
+    for (int i = 0; i < n; i++) {
+        const int lit = (i+1) * (assign[i] ? 1 : -1);
+#ifdef VERBOSE
+        if (lit > 0) {
+            if(!solfile) {
+                std::cout << lit << " ";
+            } else {
+                fprintf(solfile, "%d ", lit);
+            }
+        }
+#endif
+        if (lit > 0 || !only_neg) {
+            clause.push_back(-lit);
+        }
+    }
+#ifdef VERBOSE
+    if(!solfile) {
+        std::cout << "0" << std::endl;
+    } else {
+        fprintf(solfile, "0\n");
+    }
+#endif
+#ifdef PRINT_PROCESS_TIME
+    std::cout << "c Process time: " << CaDiCaL::absolute_process_time() << " s" << std::endl;
+#endif
+    new_clauses.push_back(clause);
+    solver->add_trusted_clause(clause);
+#ifdef PRINT_CALLBACK_TIME
+    callback_time += (double)(clock() - begin) / CLOCKS_PER_SEC;
+#endif
+    return true;
 }
 
 int ExhaustiveSearch::cb_add_external_clause_lit () {
