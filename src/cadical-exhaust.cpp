@@ -354,6 +354,7 @@ int App::main (int argc, char **argv) {
   int order = 0;
   bool only_neg = false;
   FILE * solfile = NULL;
+  bool can_forget = false;
 
   // Handle options which lead to immediate exit first.
 
@@ -539,6 +540,10 @@ int App::main (int argc, char **argv) {
     else if (!strcmp (argv[i], "--only-neg")) {
       only_neg = true;
       std::cout << "c only-neg = true" << endl;
+    }
+    else if (!strcmp (argv[i], "--can-forget")) {
+      can_forget = true;
+      std::cout << "c can-forget = true" << endl;
     }
 #ifndef __WIN32
     else if (!strcmp (argv[i], "-t")) {
@@ -904,7 +909,7 @@ int App::main (int argc, char **argv) {
   } else {
     solver->section ("solving");
 
-    ExhaustiveSearch se(solver, order, only_neg, solfile);
+    ExhaustiveSearch se(solver, order, only_neg, solfile, can_forget);
 
     max_var = solver->active ();
     //std::cout << "c Nof vars: " << max_var << std::endl;

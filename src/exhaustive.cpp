@@ -1,7 +1,7 @@
 #include "exhaustive.hpp"
 #include <iostream>
 
-ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg, FILE * solfile) : solver(s) {
+ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg, FILE * solfile, bool can_forget) : solver(s) {
     if (order == 0) {
         // No order provided; run exhaustive search on all variables
         n = s->vars();
@@ -10,6 +10,7 @@ ExhaustiveSearch::ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg
     }
     this->only_neg = only_neg;
     this->solfile = solfile;
+    this->can_forget = can_forget;
     assign = new char[n];
     solver->connect_external_propagator(this);
     for (int i = 0; i < n; i++) {
@@ -84,10 +85,10 @@ bool ExhaustiveSearch::cb_check_found_model (const std::vector<int> & model) {
 }
 
 bool ExhaustiveSearch::cb_has_external_clause (bool& is_forgettable) {
-    (void)is_forgettable;
 #ifdef PRINT_CALLBACK_TIME
     clock_t begin = clock();
 #endif
+    is_forgettable = can_forget;
     // If not all observed variables have been assigned then no blocking clause to learn
     if (num_assign < n) return false;
     // If all observed variables have been assigned then learn a blocking clause

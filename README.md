@@ -18,6 +18,10 @@ To only include negative literals in exhaustive blocking clauses, call with
 `--only-neg`.  (This optimization is safe when all solutions contain the same
 number of positive literals.)
 
+To allow the solver to forget exhaustive blocking clauses, call with `--can-forget`.
+This can cause the solver to find the same solution more than once, but it also
+can improve the solver's memory usage and efficiency.
+
 To write the list of solutions to the file `f` instead of the standard output,
 call with `--solfile <f>`.
 

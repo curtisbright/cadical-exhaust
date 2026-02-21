@@ -15,11 +15,12 @@ class ExhaustiveSearch : CaDiCaL::ExternalPropagator {
     bool only_neg = false;
     long sol_count = 0;
     FILE * solfile;
+    bool can_forget = false;
 #ifdef PRINT_CALLBACK_TIME
     double callback_time = 0;
 #endif
 public:
-    ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg, FILE * solfile);
+    ExhaustiveSearch(CaDiCaL::Solver * s, int order, bool only_neg, FILE * solfile, bool can_forget);
     ~ExhaustiveSearch ();
     void notify_assignment(const std::vector<int>& lits);
     void notify_new_decision_level ();
