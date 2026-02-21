@@ -12,7 +12,7 @@ of the DRAT format, so the proof cannot be verified by standard DRAT proof
 checkers.  A custom version of DRAT-trim that can verify such proofs can be
 found in the [DRAT-trim-t repo](https://github.com/curtisbright/drat-trim-t).
 
-To do exhaustive search over only the first n variables, call with `--order n`.
+To do exhaustive search over only the first n variables, call with `--order <n>`.
 
 To only include negative literals in exhaustive blocking clauses, call with
 `--only-neg`.  (This optimization is safe when all solutions contain the same
